@@ -1,29 +1,56 @@
-"""Load data from database for training the word chooser."""
+"""Load data from database for training the wordchooser."""
 
-import torchtext
 import os
+import re
 
-raise RuntimeError("Not ready yet")
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+import torchtext
+import nltk
 
 
-def load(base_dir):
-    """Load data from files in base_dir.
+#raise RuntimeError("Not ready yet")
+
+class WordChooserDataset(torch.utils.data.IterableDataset):
+    """
+    This class represents a dataset for the wordchooser model.
     
-    :param str base_dir: the directory containing data files
-    :returns: a list of :class:`torchtext.Dataset` objects from the data
-    :rtype: list"""
-    for file in os.listdir(base_dir):
+    :param str filename: a file or a directory containing data files
+    :param callable tokenizer: the tokenizer to use 
+    (default: torchtext basic_english)
+    """
+    def __init__(self, filename, tokenizer=None):
+        self._data = []
+        self.tokenizer = tokenizer
+        if self.tokenizer is None:
+            self.tokenizer = torchtext.data.get_tokenizer("basic_english")
+            
+        if os.path.isdir(filename):
+            for file in os.path.listdir(filename):
+                self._load(file)
+        else:
+            self._load(filename)
+            
+    def _load(self, file):
+        data = []
         with open(file) as f:
-            passage = f.read()
-            tokenizer = torchtext.data.get_tokenizer("basic_english")
-            tokens = []
-            tags = []
-            for token in tokenizer(passage):
-                selected = 0
-                if token.startswith("_") and token.endswith("_"):
-                    token = token[1:-1]
-                    selected = 1
-                tokens.append(token)
-                tags.append(selected)
-            dataset = None
-
+            for passage in f.readlines():
+                for token in self.tokenizer(passage):
+                    selected = 0
+                    match = re.fullmatch(r"_(.+)_", token)
+                    if match:
+                        token = match.group(1)
+                        selected = 1
+                    data.append((token, selected))
+        self._data.append(data)
+    
+    def __iter__(self):
+        yield from self._data
+        
+    def __len__(self):
+        return len(self._data)
+    
+    def __getitem__(self, index):
+        return self._data[index]

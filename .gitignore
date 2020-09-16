@@ -132,3 +132,6 @@ dmypy.json
 
 # Editor stuff
 .vscode/
+
+# Kaggle stuff
+dataset-metadata.json
