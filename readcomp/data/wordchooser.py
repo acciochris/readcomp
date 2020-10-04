@@ -7,11 +7,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import torchtext
 import nltk
 
+from readcomp.utils import tokenize
 
-#raise RuntimeError("Not ready yet")
 
 class WordChooserDataset(torch.utils.data.IterableDataset):
     """
@@ -25,7 +24,7 @@ class WordChooserDataset(torch.utils.data.IterableDataset):
         self._data = []
         self.tokenizer = tokenizer
         if self.tokenizer is None:
-            self.tokenizer = torchtext.data.get_tokenizer("basic_english")
+            self.tokenizer = tokenize
             
         if os.path.isdir(filename):
             for file in os.path.listdir(filename):
