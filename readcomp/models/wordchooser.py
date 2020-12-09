@@ -82,3 +82,40 @@ class RNNWordChooser(nn.Module):
 
     def fit(self, data, embeddings):
         model.embedding.weight.data.copy_(embeddings)
+
+
+class RulesWordChooser:
+    """A wordchooser model based on rules"""
+
+    def __init__(self, filters, mode="intersection"):
+        self.filters = list(filters)
+        self.mode = mode
+        self._check_attrs()
+
+    def _check_attrs(self):
+        """Check whether the attributes are valid or not"""
+
+        if not all(map(callable, self.filters)):
+            raise TypeError(
+                "All filters should be callable returning whether a word may "
+                "be selected or not"
+            )
+        if not self.mode in {"intersection", "union"}:
+            raise ValueError("Attribute `mode` should be 'intersection' or 'union'")
+
+    def __call__(self, text):
+        self._check_attrs()
+
+        # Use set.intersection or set.union
+        combine = getattr(set, self.mode)
+        results = []
+
+        # Get result for each function
+        for func in self.filters:
+            result = set()
+            for i, token in enumerate(text):
+                if func(token):
+                    result.add(i)
+            results.append(result)
+
+        return sorted(combine(*results))
