@@ -1,6 +1,6 @@
 # Readcomp - Reading Comprehension Passage Generator
 
-> Note
+> Note:
 > This project is currently inactive. Probably wait until I have more time.
 
 Readcomp is a project that tries to generate a Reading Comprehension Exercise 
